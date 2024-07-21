@@ -16,10 +16,10 @@ export component AppWindow inherits Window {
             }
         }
         seekbar := Slider{
-            value: current_pos;
-            maximum: current_max;
+            value <=> current_pos;
+            maximum <=> current_max;
             released(pos) =>{
-                seek_track(pos)
+                seek_track(pos);
             }
         }
         volbar := Slider{
