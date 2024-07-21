@@ -1,0 +1,33 @@
+import { Button, VerticalBox, HorizontalBox, Slider } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    in-out property <bool> playing: false;
+    in-out property <float> volmax: 100.0;
+    in-out property <float> current_pos;
+    in-out property <float> current_max;
+    callback play_music();
+    callback seek_track(float);
+    callback seek_vol(float);
+    VerticalBox {
+        playpause := Button {
+            text: "Play Music";
+            clicked => {
+                play_music()
+            }
+        }
+        seekbar := Slider{
+            value: current_pos;
+            maximum: current_max;
+            released(pos) =>{
+                seek_track(pos)
+            }
+        }
+        volbar := Slider{
+            value:100;
+            maximum: volmax;
+            changed(pos) =>{
+                seek_vol(pos)
+            }
+        }
+    }
+}
