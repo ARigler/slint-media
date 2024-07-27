@@ -29,6 +29,9 @@ fn main() {
     
     let app = AppWindow::new().unwrap();
     app.set_current_max(playing_duration);
+    app.set_current_pos_text("0".into());
+    let cur_max = playing_duration as i32;
+    app.set_current_max_text(((cur_max/60).to_string()+" : "+&((cur_max%60).to_string())).into());
 
     let weak: SlintWeak<AppWindow> = app.as_weak();
     let sink_rc = Rc::new(sink);
@@ -45,7 +48,7 @@ fn main() {
     let mut state_copy_3 = Rc::downgrade(&mut state.clone());
 
     let timer = Timer::default();
-    timer.start(TimerMode::Repeated, std::time::Duration::from_secs(1), move | |{progress_music(&mut state_copy);});
+    timer.start(TimerMode::Repeated, std::time::Duration::from_millis(167), move | |{progress_music(&mut state_copy);});
     app.on_play_music(
        move | | {play_pause_music(&mut state_copy_1);}
     );
@@ -59,7 +62,9 @@ pub fn progress_music(state: &mut Weak<State>){
     if let Some(unwrap_state) = state.upgrade(){
         let app_window = unwrap_state.app_window.unwrap();
         if app_window.get_playing() && app_window.get_current_max() >= app_window.get_current_pos(){
-        app_window.set_current_pos(app_window.get_current_pos()+(1.0));
+        app_window.set_current_pos(app_window.get_current_pos()+(0.167));
+        let cur_pos = app_window.get_current_pos() as i32;
+        app_window.set_current_pos_text(((cur_pos/60).to_string()+" : "+(&(cur_pos%60).to_string())).into()); 
         }
     }
 }
@@ -89,7 +94,9 @@ pub fn seek_music(state: &mut Weak<State>, pos: f32){
             let max_pos = unwrap_state.currently_playing_duration;
             let new_pos = pos_per * max_pos;
             sink.try_seek(Duration::from_secs_f32(new_pos)).unwrap();  
-            app_window.set_current_pos(new_pos);  
+            app_window.set_current_pos(new_pos); 
+            let cur_pos = app_window.get_current_pos() as i32;
+            app_window.set_current_pos_text(((cur_pos/60).to_string()+" : "+(&(cur_pos%60).to_string())).into()); 
         };
     }
 }
@@ -99,6 +106,7 @@ pub fn seek_volume(state: &mut Weak<State>, pos: f32){
         let app_window = unwrap_state.app_window.unwrap();
         if let Some(sink) = unwrap_state.sink.upgrade(){
             sink.set_volume(pos/app_window.get_volmax());
+            app_window.set_current_vol_text((app_window.get_current_vol() as i32).to_string().into());
         };
     }
 }
